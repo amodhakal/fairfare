@@ -16,7 +16,13 @@ collection = db['mock_transportation_data']
 
 #for x in collection.find():
 #  print(type(x))
-
+def update_url(drop,pickup):
+    drop_lat = drop[0]
+    drop_lon = drop[1]
+    pickup_lat = pickup[0]
+    pickup_lon = pickup[1]
+    url = f'STARThttps://m.uber.com/go/product-selection?drop%5B0%5D={{"source":"SEARCH","latitude":{drop_lat},"longitude":{drop_lon},"provider":"uber_places"}}&pickup={{"source":"SEARCH","latitude":{pickup_lat},"longitude":{pickup_lon},"provider":"here_places"}}END'
+    return url
 # call our apis for rideshare
 def estimates(startlocation, endlocation):
     collectionDict = {}
@@ -25,25 +31,23 @@ def estimates(startlocation, endlocation):
     outputDict = collectionDict.copy()
 
     # this will be after we call our apis for these.
-    for brand in collectionDict['options'][2]:
-        if brand['type'] == 'lyft':
-            #outputDict['options'][2][]
-            brand['cost'] = 0.0
-        elif brand['type'] == 'uber':
-            brand['cost'] = 0.0
-        elif brand['type'] == 'taxi':
-            brand['cost'] = 0.0
+    for index, brand in enumerate(collectionDict['options'][0]):
+        if(brand['type'] == 'uber'):
+            outputDict['options'][0][index]['link'] = update_url(coordinatesFromAddress(startlocation), coordinatesFromAddress(endlocation))
+        outputDict['options'][0][index]['cost'] = 0.0
+        # for future refence if an api fails return 0 so we know not to show it or to say its unavailable
 
 
+    biketime = get_bike_time(startlocation, endlocation) #save requests lol
+    for index, brand in enumerate(collectionDict['options'][1]):
+        outputDict['options'][1][index]['cost'] = round(brand['rate'] * biketime, 2)
 
-    for brand in collectionDict['options'][3]:
-       brand['cost'] = brand['rate'] * get_bike_time(startlocation, endlocation)
-    return collectionDict
+    return outputDict
 
 
-def get_bike_time(originAdress, destinationAdress):
+def get_bike_time(originAddress, destinationAddress):
     gmaps = googlemaps.Client(key="AIzaSyAy9dvgQ1Nc69_cfLeGWCu8sR_vWC_QrUc")
-    directions = gmaps.directions(originAdress, destinationAdress, mode="bicycling")
+    directions = gmaps.directions(originAddress, destinationAddress, mode="bicycling")
 
     if directions:
         duration_seconds = directions[0]["legs"][0]["duration"]["value"]  # Get time in seconds
@@ -76,33 +80,10 @@ def transportOptions(distance):
         return "light"
 
 
-# for our mock data, will remove car when estimating is done.
-def cheapestOption(mode):
-    collectionDict = {}
-    for x in collection.find({}, {"_id": 0, "options": 1}):
-        collectionDict = x
-
-    if(mode == "car"):
-        cheapest = {'type': 'failed', 'cost': 1000}
-        for type in collectionDict['options'][2]:
-            if (type['cost'] <= cheapest['cost']):
-                cheapest = type
-        return cheapest
-
-    if(mode == "light"):
-        cheapest = {'type': 'failed', 'rate': 1000}
-        for type in collectionDict['options'][3]:
-            if (type['rate'] <= cheapest['rate']):
-                cheapest = type
-        return cheapest
-
-
-
-
 #to connect to our front end, dont worry about this for a bit
-@app.route("/find/startlong=<startLong>startlat=<startLat>destinationlat=<destinationlat>destinationlong=<destinationLong>")
-def findPage(startLong, startLat, destinationLat, destinationLong):
-    return flask.render_template("find.html")
+@app.route("/api/find/<startaddress>/<destinationaddress>")
+def findPage(startaddress, destinationaddress):
+    return estimates(startaddress,destinationaddress) #returns our db but filled out based on information given
 
 @app.route('/')
 def index():
@@ -110,6 +91,6 @@ def index():
 
 #end of front end
 if __name__ == '__main__':
-    print(cheapestOption("light"))
-    print("\n" + get_bike_time("", "Enloe Magnet High School, 128 Clarendon Crescent, Raleigh, NC 27610"))
+    print(estimates("Hunt Library", "Talley Student Union"))
+    #print("\n" + str(get_bike_time("Hunt Library", "Talley Student Union")))
     app.run()
