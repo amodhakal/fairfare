@@ -7,9 +7,15 @@ from geopy import distance
 import googlemaps
 app = Flask(__name__)
 
-# TODO: Invalid, replace with .env
-username = "haydenpog"
-password = "MmHYWnwQTcz9fdGT"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+username = os.getenv("username")
+password = os.getenv("password")
+
+if username is None or password is None:
+    print(".env file missing with username and password")
 
 uri = f"mongodb+srv://{username}:{password}@database.7cz9j.mongodb.net/?retryWrites=true&w=majority&appName=fairfare"
 
@@ -88,9 +94,9 @@ def transportOptions(distance):
 def findPage(startaddress, destinationaddress):
     return estimates(startaddress,destinationaddress) #returns our db but filled out based on information given
 
-@app.route('/')
-def index():
-    return flask.render_template("index.html")
+@app.route("/api/status")
+def return_status():
+    return "Success"
 
 #end of front end
 if __name__ == '__main__':
