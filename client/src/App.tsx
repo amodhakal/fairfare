@@ -5,6 +5,12 @@ import { BiCurrentLocation } from "react-icons/bi";
 import { TbLocationFilled } from "react-icons/tb";
 import { useState } from "react";
 
+/*
+* Mock inputs
+* Departure - Hunt Library
+* Arrival - Talley Student Union
+*/
+
 const App = () => {
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
