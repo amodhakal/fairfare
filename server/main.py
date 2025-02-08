@@ -7,8 +7,11 @@ from geopy import distance
 import googlemaps
 app = Flask(__name__)
 
+# TODO: Invalid, replace with .env
+username = "haydenpog"
+password = "MmHYWnwQTcz9fdGT"
 
-uri = "mongodb+srv://haydenpog:MmHYWnwQTcz9fdGT@database.7cz9j.mongodb.net/?retryWrites=true&w=majority&appName=fairfare"
+uri = f"mongodb+srv://{username}:{password}@database.7cz9j.mongodb.net/?retryWrites=true&w=majority&appName=fairfare"
 
 client = MongoClient(uri, server_api=ServerApi('1'))
 db = client['fairfare']
@@ -47,7 +50,7 @@ def estimates(startlocation, endlocation):
 
 def get_bike_time(originAddress, destinationAddress):
     gmaps = googlemaps.Client(key="AIzaSyAy9dvgQ1Nc69_cfLeGWCu8sR_vWC_QrUc")
-    directions = gmaps.directions(originAddress, destinationAddress, mode="bicycling")
+    directions = gmaps.directions(originAddress, destinationAddress, mode="bicycling") # type: ignore
 
     if directions:
         duration_seconds = directions[0]["legs"][0]["duration"]["value"]  # Get time in seconds
@@ -61,14 +64,14 @@ def coordinatesFromAddress(location):
     geolocator = Nominatim(user_agent="geo_locator")
     location = geolocator.geocode(location)
     if location:
-        return [location.latitude, location.longitude]
+        return [location.latitude, location.longitude] # type: ignore
     else:
         return None
 
 def addressFromCoordinates(location):
     geolocator = Nominatim(user_agent="geo_locator")
     location = geolocator.reverse((location), exactly_one=True)
-    return location.address if location else None
+    return location.address if location else None # type: ignore
 # end coordinate code
 
 
@@ -91,6 +94,4 @@ def index():
 
 #end of front end
 if __name__ == '__main__':
-    print(estimates("Hunt Library", "Talley Student Union"))
-    #print("\n" + str(get_bike_time("Hunt Library", "Talley Student Union")))
     app.run()
