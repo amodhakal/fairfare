@@ -3,17 +3,29 @@ import { IoIosPin } from "react-icons/io";
 import { FaCircleDot } from "react-icons/fa6";
 import { BiCurrentLocation } from "react-icons/bi";
 import { TbLocationFilled } from "react-icons/tb";
-import { useState } from "react";
+import { useState, FormEvent, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 /*
-* Mock inputs
-* Departure - Hunt Library
-* Arrival - Talley Student Union
-*/
+ * Mock inputs
+ * Departure - Hunt Library
+ * Arrival - Talley Student Union
+ */
 
-const App = () => {
+export default function App() {
+  const navigateTo = useNavigate();
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
+
+    useEffect(() => {
+      const departureInput = localStorage.getItem("departure");
+      const arrivalInput = localStorage.getItem("arrival");
+  
+      if (!departureInput || !arrivalInput) return;
+      setDeparture(departureInput!);
+      setArrival(arrivalInput!);
+  
+    }, [])
 
   return (
     <div className="relative h-screen flex justify-center">
@@ -33,13 +45,13 @@ const App = () => {
         }}
       />
 
-      <div className="absolute bottom-0 w-full bg-white rounded-t-3xl px-8 pt-8 box-border shadow-xl z-50 max-w-3xl ">
+      <div className="absolute bottom-0 w-full bg-white rounded-t-3xl px-8 pt-8 box-border shadow z-50 max-w-3xl ">
         <h1 className="text-4xl font-black text-left">Fairfare</h1>
         <h2 className="text-md font-bold text-left mb-3 mt-1 text-red-500">
           Where are you going today?
         </h2>
 
-        <form className="flex flex-col py-4">
+        <form className="flex flex-col py-4" onSubmit={handleSubmit}>
           <div className="relative mb-2">
             <FaCircleDot className="absolute left-3.5 top-5.5 -translate-y-1/2 text-black text-xl pointer-events-none" />
             <input
@@ -68,13 +80,18 @@ const App = () => {
             />
           </div>
 
-          <button className="bg-black text-white p-4 rounded-3xl font-bold">
+          <button className="bg-black text-white p-4 rounded-3xl font-bold cursor-pointer active:bg-gray-800">
             Find transportation
           </button>
         </form>
       </div>
     </div>
   );
-};
 
-export default App;
+  function handleSubmit(ev: FormEvent) {
+    ev.preventDefault();
+    localStorage.setItem("departure", departure);
+    localStorage.setItem("arrival", arrival);
+    navigateTo("/dashboard");
+  }
+}
