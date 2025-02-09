@@ -90,7 +90,7 @@ function Transportation(props: TransportationProp) {
       </div>
 
       {/* Price */}
-      <div className="text-lg font-semibold text-right">${data.rate}</div>
+      <div className="text-lg font-semibold justify-end">${data.rate}</div>
     </div>
   );
 }
@@ -98,7 +98,7 @@ function Transportation(props: TransportationProp) {
 function BottomPanel({ routeData }: { routeData?: RouteOptions | null }) {
   if (!routeData) {
     return (
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 px-4">
         <h1 className="text-4xl font-black text-left mx-8">Fairfare</h1>
         <div className="animate-pulse">
           <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -147,7 +147,7 @@ export default function Dashboard() {
 
     setDeparture(departureInput);
     setArrival(arrivalInput);
-  }, []);
+  }, [navigateTo]);
 
   useEffect(() => {
     if (departure && arrival) {
