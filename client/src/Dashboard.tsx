@@ -5,6 +5,7 @@ import { IoIosPin } from "react-icons/io";
 import { FaCircleDot } from "react-icons/fa6";
 import { BiSolidTaxi } from "react-icons/bi";
 import { PiScooter } from "react-icons/pi";
+import { RiStarSFill } from "react-icons/ri";
 
 interface TransportOption {
   cost: number;
@@ -86,7 +87,7 @@ function Transportation(props: TransportationProp) {
         <div className="flex flex-col">
           <p className="text-lg font-medium capitalize">{data.type}</p>
           <div className="flex space-x-1">
-            {[...Array(filledStars)].map(() => "🌟 ")}
+            {[...Array(filledStars)].map(() => <RiStarSFill />)}
           </div>
         </div>
       </div>
