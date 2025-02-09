@@ -86,7 +86,7 @@ function Transportation(props: TransportationProp) {
         <div className="flex flex-col">
           <p className="text-lg font-medium capitalize">{data.type}</p>
           <div className="flex space-x-1">
-            {[...Array(filledStars)].map(() => "✨ ")}
+            {[...Array(filledStars)].map(() => "🌟 ")}
           </div>
         </div>
       </div>
