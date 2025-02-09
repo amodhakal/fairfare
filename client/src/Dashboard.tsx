@@ -1,8 +1,8 @@
 import { useEffect, useState, Suspense } from "react";
 import { useNavigate } from "react-router";
 import map from "./assets/map.png";
-import { IoIosPin, IoIosStarOutline } from "react-icons/io";
-import { FaCircleDot, FaStar } from "react-icons/fa6";
+import { IoIosPin } from "react-icons/io";
+import { FaCircleDot } from "react-icons/fa6";
 import { BiSolidTaxi } from "react-icons/bi";
 import { PiScooter } from "react-icons/pi";
 
@@ -18,7 +18,6 @@ interface MicromobilityOption extends TransportOption {
   type: MicromobilityType;
   rate: number | string;
 }
-
 
 // Specific types for better type safety
 type RideShareType = "taxi" | "uber" | "lyft";
@@ -53,8 +52,7 @@ type TransportationProp = {
 function Transportation(props: TransportationProp) {
   const { data, isLastItem } = props;
   const maxStars = 5;
-  const filledStars = Math.min(data.rating, maxStars);
-  const emptyStars = maxStars - filledStars;
+  const filledStars = Math.max(1, Math.min(data.rating, maxStars));
 
   const Icon = ["uber", "lyft", "taxi"].includes(data.type) ? (
     <BiSolidTaxi />
@@ -88,14 +86,7 @@ function Transportation(props: TransportationProp) {
         <div className="flex flex-col">
           <p className="text-lg font-medium capitalize">{data.type}</p>
           <div className="flex space-x-1">
-            {/* Render Filled Stars */}
-            {[...Array(filledStars)].map((_, i) => (
-              <FaStar key={`filled-${i}`} className="text-black" />
-            ))}
-            {/* Render Empty Stars */}
-            {[...Array(emptyStars)].map((_, i) => (
-              <IoIosStarOutline key={`empty-${i}`} className="text-gray-400" />
-            ))}
+            {[...Array(filledStars)].map(() => "✨ ")}
           </div>
         </div>
       </div>
@@ -109,33 +100,31 @@ function Transportation(props: TransportationProp) {
 function BottomPanel({ routeData }: { routeData?: RouteOptions | null }) {
   if (!routeData) {
     return (
-      <div className="flex flex-col space-y-4 px-4">
+      <div className="flex flex-col space-y-4 px-8">
         <h1 className="text-4xl font-black text-left mx-8">Fairfare</h1>
-        <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mt-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-2/3 mt-4"></div>
-        </div>
+        <p className="text-left mx-8">✨ Results loading in ✨</p>
       </div>
     );
   }
 
   const [first, second] = routeData.options;
 
-  const actual = [
-    ...first,
-    ...second,
-  ].map((item) => ({
-    ...item,
-    rate: item.cost.toFixed(2),
-  })).sort(
-    (a, b) => parseFloat(a.rate.toString()) - parseFloat(b.rate.toString())
-  );
+  const actual = [...first, ...second]
+    .map((item) => ({
+      ...item,
+      rate: item.cost.toFixed(2),
+    }))
+    .sort(
+      (a, b) => parseFloat(a.rate.toString()) - parseFloat(b.rate.toString())
+    );
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto">
-        <h1 className="font-black mb-2 text-4xl mx-8">Select an option</h1>
+        <h1 className="font-black mb-2 text-4xl mx-8">Results✨</h1>
+        <p className="text-sm text-gray-400 mx-8 mb-2">
+          *Prices are estimates and do not contain tax or other app fees
+        </p>
         {actual.map((data, index) => (
           <Transportation
             data={data}
