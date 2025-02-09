@@ -45,7 +45,7 @@ export default function App() {
         }}
       />
 
-      <div className="absolute bottom-10 w-full bg-white rounded-t-3xl px-8 pt-8 box-border shadow z-50 max-w-3xl ">
+      <div className="absolute bottom-20 w-full bg-white rounded-t-3xl px-8 pt-8 box-border shadow z-50 max-w-3xl ">
         <h1 className="text-4xl font-black text-left">Fairfare</h1>
         <h2 className="text-md font-bold text-left mb-3 mt-1 text-red-500">
           Where are you going today?
