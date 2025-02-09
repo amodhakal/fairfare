@@ -4,8 +4,13 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from geopy.geocoders import Nominatim
 from geopy import distance
+from flask_cors import CORS
 import googlemaps
+
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173", "allow_headers": ["Content-Type"]}})
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 import os
 from dotenv import load_dotenv
@@ -92,6 +97,10 @@ def transportOptions(distance):
 #to connect to our front end, dont worry about this for a bit
 @app.route("/api/find/<startaddress>/<destinationaddress>")
 def findPage(startaddress, destinationaddress):
+    if startaddress == "Hunt Library":
+        startaddress = "James B. Hunt Jr. Library"
+    if destinationaddress == "Hunt Library":
+        destinationaddress = "James B. Hunt Jr. Library"
     return estimates(startaddress,destinationaddress) #returns our db but filled out based on information given
 
 @app.route("/api/status")
@@ -100,4 +109,4 @@ def return_status():
 
 #end of front end
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True, host='0.0.0.0', port=8080)
