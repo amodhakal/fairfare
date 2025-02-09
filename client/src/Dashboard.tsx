@@ -58,7 +58,12 @@ function Transportation(props: TransportationProp) {
 
   const handleClick = () => {
     if (data.link) {
-      window.open(data.link.replace(/^START/, "").replace(/END$/, "").trim());
+      window.open(
+        data.link
+          .replace(/^START/, "")
+          .replace(/END$/, "")
+          .trim()
+      );
     }
   };
 
@@ -110,8 +115,18 @@ function BottomPanel({ routeData }: { routeData?: RouteOptions | null }) {
   }
 
   const [first, second] = routeData.options;
-  const actual = [...first, ...second];
-  actual.sort((a, b) => a.rate - b.rate);
+
+  const actual = [
+    ...first,
+    ...second.map((item) => {
+      return {
+        rating: item.rating,
+        type: item.type,
+        rate: item.cost.toFixed(2),
+      };
+    }),
+  ];
+  actual.sort((a, b) => parseFloat(a.rate.toString()) - parseFloat(b.rate.toString()));
 
   return (
     <div className="h-full flex flex-col">
