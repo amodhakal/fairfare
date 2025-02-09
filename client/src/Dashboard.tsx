@@ -10,9 +10,15 @@ interface TransportOption {
   cost: number;
   rating: number;
   type: string;
-  link?: string; // Optional for uber
-  rate?: number; // Optional for micromobility options
+  link?: string;
+  rate?: number | string;
 }
+
+interface MicromobilityOption extends TransportOption {
+  type: MicromobilityType;
+  rate: number | string;
+}
+
 
 // Specific types for better type safety
 type RideShareType = "taxi" | "uber" | "lyft";
@@ -29,7 +35,7 @@ interface RideShareOption extends TransportOption {
 
 interface MicromobilityOption extends TransportOption {
   type: MicromobilityType;
-  rate: number; // Rate is required for micromobility
+  rate: number | string; // Rate is required for micromobility
 }
 
 interface RouteOptions {
@@ -118,15 +124,13 @@ function BottomPanel({ routeData }: { routeData?: RouteOptions | null }) {
 
   const actual = [
     ...first,
-    ...second.map((item) => {
-      return {
-        rating: item.rating,
-        type: item.type,
-        rate: item.cost.toFixed(2),
-      };
-    }),
-  ];
-  actual.sort((a, b) => parseFloat(a.rate.toString()) - parseFloat(b.rate.toString()));
+    ...second.map((item) => ({
+      ...item,
+      rate: item.cost.toFixed(2),
+    })),
+  ].sort(
+    (a, b) => parseFloat(a.rate.toString()) - parseFloat(b.rate.toString())
+  );
 
   return (
     <div className="h-full flex flex-col">
