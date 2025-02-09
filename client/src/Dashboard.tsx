@@ -116,7 +116,7 @@ function BottomPanel({ routeData }: { routeData?: RouteOptions | null }) {
       rate: item.cost.toFixed(2),
     }))
     .sort(
-      (a, b) => parseFloat(a.rate.toString()) - parseFloat(b.rate.toString())
+      (a, b) => parseFloat(b.rating.toString()) - parseFloat(a.rating.toString())
     );
 
   return (
