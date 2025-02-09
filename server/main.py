@@ -1,5 +1,5 @@
 import flask
-from flask import Flask
+from flask import Flask, send_from_directory
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from geopy.geocoders import Nominatim
@@ -7,9 +7,13 @@ from geopy import distance
 from flask_cors import CORS
 import googlemaps
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='')
 cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173", "allow_headers": ["Content-Type"]}})
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+@app.route('/')
+def index():
+    return send_from_directory(app.static_folder, 'index.html') # type: ignore
 
 
 import os
@@ -109,4 +113,4 @@ def return_status():
 
 #end of front end
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    app.run(port=8080)
