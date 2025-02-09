@@ -56,9 +56,9 @@ def estimates(startlocation, endlocation):
         # for future refence if an api fails return 0 so we know not to show it or to say its unavailable
 
 
-    biketime = get_bike_time(startlocation, endlocation) #save requests lol
+    biketime = get_bike_time(startlocation, endlocation) # lets not do another request for each LOLL
     for index, brand in enumerate(collectionDict['options'][1]):
-        outputDict['options'][1][index]['cost'] = round(brand['rate'] * biketime, 2)
+        outputDict['options'][1][index]['cost'] = round(brand['rate'] * biketime, 2) + 1 # unlock fee is usually $1 for all companies
 
     return outputDict
 
