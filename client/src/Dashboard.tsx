@@ -1,45 +1,173 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useNavigate } from "react-router";
 import map from "./assets/map.png";
-import { IoIosPin } from "react-icons/io";
-import { FaCircleDot } from "react-icons/fa6";
+import { IoIosPin, IoIosStarOutline } from "react-icons/io";
+import { FaCircleDot, FaStar } from "react-icons/fa6";
+import { BiSolidTaxi } from "react-icons/bi";
+import { PiScooter } from "react-icons/pi";
+
+interface TransportOption {
+  cost: number;
+  rating: number;
+  type: string;
+  link?: string; // Optional for uber
+  rate?: number; // Optional for micromobility options
+}
+
+// Specific types for better type safety
+type RideShareType = "taxi" | "uber" | "lyft";
+type MicromobilityType =
+  | "limescooter"
+  | "limebike"
+  | "birdscooter"
+  | "spinscooter";
+
+interface RideShareOption extends TransportOption {
+  type: RideShareType;
+  rate: number;
+}
+
+interface MicromobilityOption extends TransportOption {
+  type: MicromobilityType;
+  rate: number; // Rate is required for micromobility
+}
+
+interface RouteOptions {
+  options: [
+    RideShareOption[], // First array is always ride-share options
+    MicromobilityOption[] // Second array is always micromobility options
+  ];
+}
+
+type TransportationProp = {
+  data: RideShareOption | MicromobilityOption;
+  isLastItem: boolean;
+};
+
+function Transportation(props: TransportationProp) {
+  const { data, isLastItem } = props;
+  const maxStars = 5;
+  const filledStars = Math.min(data.rating, maxStars);
+  const emptyStars = maxStars - filledStars;
+
+  const Icon = ["uber", "lyft", "taxi"].includes(data.type) ? (
+    <BiSolidTaxi />
+  ) : (
+    <PiScooter />
+  );
+
+  const handleClick = () => {
+    if (data.link) {
+      window.open(data.link.replace(/^START/, "").replace(/END$/, "").trim());
+    }
+  };
+
+  return (
+    <div
+      className={`flex justify-between items-center p-4 bg-white hover:bg-gray-50 cursor-pointer ${
+        data.link ? "" : "cursor-default"
+      } ${isLastItem ? "" : "border-b"}`}
+      onClick={handleClick}
+    >
+      <div className="flex items-center space-x-4">
+        {/* Icon Section */}
+        <div className="text-xl">{Icon}</div>
+
+        {/* Rating and Type */}
+        <div className="flex flex-col">
+          <p className="text-lg font-medium capitalize">{data.type}</p>
+          <div className="flex space-x-1">
+            {/* Render Filled Stars */}
+            {[...Array(filledStars)].map((_, i) => (
+              <FaStar key={`filled-${i}`} className="text-black" />
+            ))}
+            {/* Render Empty Stars */}
+            {[...Array(emptyStars)].map((_, i) => (
+              <IoIosStarOutline key={`empty-${i}`} className="text-gray-400" />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Price */}
+      <div className="text-lg font-semibold text-right">${data.rate}</div>
+    </div>
+  );
+}
+
+function BottomPanel({ routeData }: { routeData?: RouteOptions | null }) {
+  if (!routeData) {
+    return (
+      <div className="flex flex-col space-y-4">
+        <h1 className="text-4xl font-black text-left mx-8">Fairfare</h1>
+        <div className="animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mt-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-2/3 mt-4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const [first, second] = routeData.options;
+  const actual = [...first, ...second];
+  actual.sort((a, b) => a.rate - b.rate);
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 overflow-y-auto">
+        <h1 className="font-black mb-2 text-4xl mx-8">Select an option</h1>
+        {actual.map((data, index) => (
+          <Transportation
+            data={data}
+            key={index}
+            isLastItem={index === actual.length - 1}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [departure, setDeparture] = useState("");
   const [arrival, setArrival] = useState("");
+  const [routeData, setRouteData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigateTo = useNavigate();
 
   useEffect(() => {
-    // Get values from localStorage
     const departureInput = localStorage.getItem("departure");
     const arrivalInput = localStorage.getItem("arrival");
 
-    // Redirect if values don't exist
     if (!departureInput || !arrivalInput) {
       navigateTo("/");
       return;
     }
 
-    // Set state values
-    setDeparture(departureInput!);
-    setArrival(arrivalInput!);
-  }, []); // Only run on mount
+    setDeparture(departureInput);
+    setArrival(arrivalInput);
+  }, []);
 
-  // Separate useEffect for API call
   useEffect(() => {
-    // Only make the API call if both values exist
     if (departure && arrival) {
+      setIsLoading(true);
       fetch(
         `/api/find/${encodeURIComponent(departure)}/${encodeURIComponent(
           arrival
         )}`
       )
-        .then((data) => data.json().then(res => console.log(res)))
+        .then((data) => data.json())
+        .then((res) => {
+          setRouteData(res);
+          setIsLoading(false);
+        })
         .catch((error) => {
           console.error("API Error:", error);
+          setIsLoading(false);
         });
     }
-  }, [departure, arrival]); // Run when departure or arrival change
+  }, [departure, arrival]);
 
   return (
     <div className="relative h-screen flex justify-center">
@@ -51,7 +179,7 @@ export default function Dashboard() {
           backgroundPosition: "center",
         }}
       />
-      <div className="absolute top-4 w-80 bg-white rounded-3xl p-5 box-border shadow z-50 max-w-3xl flex items-center justify-between">
+      <div className="absolute top-4 w-80 p-4 bg-white rounded-3xl box-border shadow z-50 max-w-3xl flex items-center justify-between">
         <div className="">
           <div className="relative mb-4">
             <FaCircleDot className="absolute top-3 -translate-y-1/2 text-black text-xl pointer-events-none" />
@@ -68,6 +196,11 @@ export default function Dashboard() {
         >
           Edit
         </button>
+      </div>
+      <div className="absolute bottom-0 w-full bg-white rounded-t-3xl pt-8 pb-8 box-border shadow z-50 max-w-3xl h-3/5 flex flex-col">
+        <Suspense fallback={<BottomPanel routeData={null} />}>
+          <BottomPanel routeData={!isLoading ? routeData : null} />
+        </Suspense>
       </div>
     </div>
   );
