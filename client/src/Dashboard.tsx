@@ -30,7 +30,7 @@ type MicromobilityType =
 
 interface RideShareOption extends TransportOption {
   type: RideShareType;
-  rate: number;
+  rate: number | string;
 }
 
 interface MicromobilityOption extends TransportOption {
@@ -124,11 +124,11 @@ function BottomPanel({ routeData }: { routeData?: RouteOptions | null }) {
 
   const actual = [
     ...first,
-    ...second.map((item) => ({
-      ...item,
-      rate: item.cost.toFixed(2),
-    })),
-  ].sort(
+    ...second,
+  ].map((item) => ({
+    ...item,
+    rate: item.cost.toFixed(2),
+  })).sort(
     (a, b) => parseFloat(a.rate.toString()) - parseFloat(b.rate.toString())
   );
 
