@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - FLASK_APP=main.py
+      - FLASK_ENV=development
+      - PORT=8080
+    volumes:
+      - ./server:/app
+    restart: unless-stopped
+
+  client:
+    image: node:20-slim
+    working_dir: /app/client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app/client
+    command: sh -c "npm install -g pnpm && pnpm install && pnpm dev --host"
+    depends_on:
+      - server
+    restart: unless-stopped
